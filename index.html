@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vector B-Spec</title>
+  </head>
+  <body>
+    <main id="app">
+      <canvas id="game-canvas" aria-label="Vector B-Spec race view"></canvas>
+
+      <section class="hud hud-left" aria-label="Race control">
+        <div class="brand-row">
+          <div>
+            <p class="eyebrow">VECTOR</p>
+            <h1>B-SPEC</h1>
+          </div>
+          <div class="status-pill" id="race-state">LIVE</div>
+        </div>
+
+        <div class="control-block">
+          <div class="block-title">PACE</div>
+          <div class="segments" id="pace-controls" role="group" aria-label="Pace command">
+            <button type="button" data-pace="0">COOL</button>
+            <button type="button" data-pace="1" class="is-active">BASE</button>
+            <button type="button" data-pace="2">PUSH</button>
+            <button type="button" data-pace="3">MAX</button>
+          </div>
+        </div>
+
+        <div class="command-grid">
+          <button type="button" class="command-button" id="overtake-button" aria-pressed="false">
+            <span>OVERTAKE</span>
+            <strong id="overtake-state">ARM</strong>
+          </button>
+          <button type="button" class="command-button boost-button" id="boost-button">
+            <span>BOOST</span>
+            <strong id="boost-state">READY</strong>
+          </button>
+        </div>
+
+        <div class="meter-stack" aria-label="Telemetry">
+          <div class="meter-row">
+            <span>ENERGY</span>
+            <div class="meter"><i id="energy-meter"></i></div>
+            <b id="energy-value">100</b>
+          </div>
+          <div class="meter-row">
+            <span>HEAT</span>
+            <div class="meter heat"><i id="heat-meter"></i></div>
+            <b id="heat-value">0</b>
+          </div>
+          <div class="meter-row">
+            <span>FOCUS</span>
+            <div class="meter focus"><i id="focus-meter"></i></div>
+            <b id="focus-value">100</b>
+          </div>
+        </div>
+      </section>
+
+      <section class="hud hud-right" aria-label="Race data">
+        <div class="readout-grid">
+          <div>
+            <span>POS</span>
+            <strong id="position-value">1/6</strong>
+          </div>
+          <div>
+            <span>LAP</span>
+            <strong id="lap-value">1/3</strong>
+          </div>
+          <div>
+            <span>SPEED</span>
+            <strong id="speed-value">000</strong>
+          </div>
+          <div>
+            <span>GAP</span>
+            <strong id="gap-value">--</strong>
+          </div>
+        </div>
+
+        <div class="standings">
+          <div class="block-title">RUNNING ORDER</div>
+          <ol id="standings-list"></ol>
+        </div>
+      </section>
+
+      <section class="race-message" id="race-message" aria-live="polite">
+        <p id="radio-message">Driver settled. Pace target confirmed.</p>
+        <button type="button" id="restart-button">RESTART</button>
+      </section>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

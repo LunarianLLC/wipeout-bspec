@@ -13,7 +13,8 @@ Open `http://127.0.0.1:5173/`.
 
 ## Controls
 
+- Garage: choose a color craft before launch; each one changes speed, cooldown, cornering, boost, and control stats
 - Pace: `COOL`, `BASE`, `PUSH`, `MAX`
 - `OVERTAKE`: arms the driver to spend focus and energy when close to traffic
 - `BOOST`: deploys a short speed burst if energy and heat allow it
-- Keyboard: `1`-`4` for pace, `O` for overtake, `B` or `Space` for boost
+- Keyboard: `1`-`6` in the garage, `Enter` to start, `1`-`4` for pace, `O` for overtake, `B` or `Space` for boost

@@ -9,7 +9,31 @@
     <main id="app">
       <canvas id="game-canvas" aria-label="Vector B-Spec race view"></canvas>
 
-      <section class="hud hud-left" aria-label="Race control">
+      <section class="car-select" id="car-select-screen" aria-label="Car select">
+        <div class="select-shell">
+          <div class="select-header">
+            <div>
+              <p class="eyebrow">GARAGE</p>
+              <h2>SELECT CRAFT</h2>
+            </div>
+            <div class="selected-car">
+              <span class="car-swatch" id="selected-car-swatch"></span>
+              <div>
+                <span id="selected-car-role">BALANCED</span>
+                <strong id="selected-car-name">Mako</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="car-grid" id="car-grid" role="group" aria-label="Car color and spec choices"></div>
+
+          <div class="select-footer">
+            <button type="button" id="start-race-button">START RACE</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="hud hud-left is-hidden" aria-label="Race control">
         <div class="brand-row">
           <div>
             <p class="eyebrow">VECTOR</p>
@@ -58,7 +82,7 @@
         </div>
       </section>
 
-      <section class="hud hud-right" aria-label="Race data">
+      <section class="hud hud-right is-hidden" aria-label="Race data">
         <div class="readout-grid">
           <div>
             <span>POS</span>
@@ -84,9 +108,12 @@
         </div>
       </section>
 
-      <section class="race-message" id="race-message" aria-live="polite">
+      <section class="race-message is-hidden" id="race-message" aria-live="polite">
         <p id="radio-message">Driver settled. Pace target confirmed.</p>
-        <button type="button" id="restart-button">RESTART</button>
+        <div class="race-actions">
+          <button type="button" id="garage-button">GARAGE</button>
+          <button type="button" id="restart-button">RESTART</button>
+        </div>
       </section>
     </main>
     <script type="module" src="/src/main.js"></script>

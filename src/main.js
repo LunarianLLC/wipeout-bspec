@@ -28,6 +28,129 @@ const paceProfiles = [
   { speed: 1.14, heat: 5.5, focus: -6, energy: -1, label: "Push pace. Driver leaning in." },
   { speed: 1.28, heat: 11, focus: -13, energy: -5, label: "Max pace. Watch heat and focus." },
 ];
+const BASE_CAR_SPEC = {
+  speed: 1,
+  acceleration: 1,
+  cornering: 1,
+  cooldown: 1,
+  cooling: 1,
+  heatGain: 1,
+  energyRecovery: 1,
+  energyCost: 1,
+  focusRecovery: 1,
+  focusCost: 1,
+  boostPower: 1,
+  boostDuration: 1,
+  boostCost: 1,
+  lapCharge: 1,
+  overtakePower: 1,
+};
+const carChoices = [
+  {
+    id: "teal",
+    name: "Mako",
+    role: "BALANCED",
+    color: 0x2df7d0,
+    accent: 0xffe25c,
+    spec: { ...BASE_CAR_SPEC },
+    ratings: { speed: 3, cooldown: 3, cornering: 3, boost: 3, control: 3 },
+  },
+  {
+    id: "red",
+    name: "Comet",
+    role: "COOLDOWN",
+    color: 0xff3d5e,
+    accent: 0xffc857,
+    spec: {
+      ...BASE_CAR_SPEC,
+      speed: 0.98,
+      acceleration: 1.04,
+      cooldown: 0.66,
+      cooling: 1.18,
+      heatGain: 0.96,
+      boostCost: 1.04,
+      boostPower: 1.06,
+    },
+    ratings: { speed: 3, cooldown: 5, cornering: 2, boost: 4, control: 3 },
+  },
+  {
+    id: "green",
+    name: "Viper",
+    role: "TOP SPEED",
+    color: 0x8dff61,
+    accent: 0x263238,
+    spec: {
+      ...BASE_CAR_SPEC,
+      speed: 1.08,
+      acceleration: 0.96,
+      cornering: 0.92,
+      cooldown: 1.1,
+      cooling: 0.94,
+      heatGain: 1.08,
+      boostPower: 0.95,
+    },
+    ratings: { speed: 5, cooldown: 2, cornering: 2, boost: 3, control: 2 },
+  },
+  {
+    id: "orange",
+    name: "Apex",
+    role: "CORNERING",
+    color: 0xff8a45,
+    accent: 0xffffff,
+    spec: {
+      ...BASE_CAR_SPEC,
+      speed: 0.99,
+      acceleration: 1.03,
+      cornering: 1.24,
+      cooling: 1.05,
+      heatGain: 0.98,
+      focusCost: 0.86,
+      overtakePower: 1.08,
+    },
+    ratings: { speed: 3, cooldown: 3, cornering: 5, boost: 3, control: 4 },
+  },
+  {
+    id: "blue",
+    name: "Pulse",
+    role: "BOOST",
+    color: 0x5a7dff,
+    accent: 0xffe25c,
+    spec: {
+      ...BASE_CAR_SPEC,
+      speed: 1.02,
+      acceleration: 1.12,
+      cooldown: 0.92,
+      heatGain: 1.1,
+      boostPower: 1.2,
+      boostDuration: 0.9,
+      boostCost: 1.1,
+    },
+    ratings: { speed: 4, cooldown: 3, cornering: 3, boost: 5, control: 2 },
+  },
+  {
+    id: "violet",
+    name: "Nova",
+    role: "CONTROL",
+    color: 0xd76bff,
+    accent: 0x2df7d0,
+    spec: {
+      ...BASE_CAR_SPEC,
+      speed: 0.97,
+      cornering: 1.09,
+      cooldown: 0.96,
+      cooling: 1.1,
+      energyCost: 0.88,
+      focusRecovery: 1.18,
+      focusCost: 0.9,
+      lapCharge: 1.22,
+    },
+    ratings: { speed: 2, cooldown: 4, cornering: 4, boost: 2, control: 5 },
+  },
+];
+const rivalCarIds = ["red", "green", "orange", "blue", "violet"];
+let selectedCar = carChoices[0];
+let gamePhase = "select";
+let sceneTime = 0;
 
 const controlPoints = [
   [-18, 0, 8],
@@ -58,21 +181,24 @@ addWorld();
 
 const player = createRacer({
   name: "YOU",
-  color: 0x2df7d0,
-  accent: 0xffe25c,
+  color: selectedCar.color,
+  accent: selectedCar.accent,
+  spec: selectedCar.spec,
+  car: selectedCar,
   lane: -0.14,
   skill: 1.02,
   isPlayer: true,
   progress: 5,
 });
 
+const rivalCars = rivalCarIds.map((id) => getCarChoice(id));
 const racers = [
   player,
-  createRacer({ name: "KIRA", color: 0xff3d5e, accent: 0xffc857, lane: 0.18, skill: 1.01, progress: -10 }),
-  createRacer({ name: "MARA", color: 0x8dff61, accent: 0x263238, lane: -0.32, skill: 0.995, progress: -25 }),
-  createRacer({ name: "SOL", color: 0xff8a45, accent: 0xffffff, lane: 0.34, skill: 0.985, progress: -40 }),
-  createRacer({ name: "AXEL", color: 0x5a7dff, accent: 0xffe25c, lane: -0.06, skill: 1.008, progress: -55 }),
-  createRacer({ name: "NOVA", color: 0xd76bff, accent: 0x2df7d0, lane: 0.03, skill: 0.978, progress: -70 }),
+  createRacer({ name: "KIRA", car: rivalCars[0], color: rivalCars[0].color, accent: rivalCars[0].accent, spec: rivalCars[0].spec, lane: 0.18, skill: 1.01, progress: -10 }),
+  createRacer({ name: "MARA", car: rivalCars[1], color: rivalCars[1].color, accent: rivalCars[1].accent, spec: rivalCars[1].spec, lane: -0.32, skill: 0.995, progress: -25 }),
+  createRacer({ name: "SOL", car: rivalCars[2], color: rivalCars[2].color, accent: rivalCars[2].accent, spec: rivalCars[2].spec, lane: 0.34, skill: 0.985, progress: -40 }),
+  createRacer({ name: "AXEL", car: rivalCars[3], color: rivalCars[3].color, accent: rivalCars[3].accent, spec: rivalCars[3].spec, lane: -0.06, skill: 1.008, progress: -55 }),
+  createRacer({ name: "NOVA", car: rivalCars[4], color: rivalCars[4].color, accent: rivalCars[4].accent, spec: rivalCars[4].spec, lane: 0.03, skill: 0.978, progress: -70 }),
 ];
 racers.forEach((racer) => scene.add(racer.group));
 
@@ -89,6 +215,14 @@ const race = {
 };
 
 const ui = {
+  carSelectScreen: document.querySelector("#car-select-screen"),
+  carGrid: document.querySelector("#car-grid"),
+  selectedCarName: document.querySelector("#selected-car-name"),
+  selectedCarRole: document.querySelector("#selected-car-role"),
+  selectedCarSwatch: document.querySelector("#selected-car-swatch"),
+  startRaceButton: document.querySelector("#start-race-button"),
+  hudLeft: document.querySelector(".hud-left"),
+  hudRight: document.querySelector(".hud-right"),
   paceButtons: Array.from(document.querySelectorAll("[data-pace]")),
   overtakeButton: document.querySelector("#overtake-button"),
   overtakeState: document.querySelector("#overtake-state"),
@@ -106,11 +240,16 @@ const ui = {
   speedValue: document.querySelector("#speed-value"),
   gapValue: document.querySelector("#gap-value"),
   standingsList: document.querySelector("#standings-list"),
+  raceMessage: document.querySelector("#race-message"),
   radioMessage: document.querySelector("#radio-message"),
+  garageButton: document.querySelector("#garage-button"),
   restartButton: document.querySelector("#restart-button"),
 };
 
 wireControls();
+renderCarSelect();
+selectCar(selectedCar.id, { announce: false });
+syncScreenState();
 resize();
 window.addEventListener("resize", resize);
 requestAnimationFrame(loop);
@@ -357,7 +496,7 @@ function addWorld() {
   }
 }
 
-function createRacer({ name, color, accent, lane, skill, isPlayer = false, progress = 0 }) {
+function createRacer({ name, color, accent, lane, skill, spec = BASE_CAR_SPEC, car = null, isPlayer = false, progress = 0 }) {
   const group = new THREE.Group();
   const bodyMaterial = new THREE.MeshStandardMaterial({
     color,
@@ -413,6 +552,13 @@ function createRacer({ name, color, accent, lane, skill, isPlayer = false, progr
     name,
     group,
     flame,
+    bodyMaterial,
+    accentMaterial,
+    flameMaterial,
+    color,
+    accent,
+    car,
+    spec,
     lane,
     targetLane: lane,
     laneVelocity: 0,
@@ -466,20 +612,32 @@ function createShipGeometry() {
 }
 
 function wireControls() {
+  ui.startRaceButton.addEventListener("click", startRace);
+  ui.garageButton.addEventListener("click", openGarage);
+
   ui.paceButtons.forEach((button) => {
     button.addEventListener("click", () => setPace(Number(button.dataset.pace)));
   });
 
   ui.overtakeButton.addEventListener("click", () => {
+    if (gamePhase !== "race") return;
     race.overtake = !race.overtake;
     setRadio(race.overtake ? "Overtake armed. Driver will spend focus in traffic." : "Overtake cancelled. Holding line.");
     updateButtonState();
   });
 
   ui.boostButton.addEventListener("click", deployBoost);
-  ui.restartButton.addEventListener("click", resetRace);
+  ui.restartButton.addEventListener("click", () => resetRace(`${selectedCar.name} restarted. Pace target confirmed.`));
 
   window.addEventListener("keydown", (event) => {
+    if (gamePhase === "select") {
+      if (event.key >= "1" && event.key <= String(carChoices.length)) {
+        selectCar(carChoices[Number(event.key) - 1].id);
+      }
+      if (event.key === "Enter") startRace();
+      return;
+    }
+
     if (event.key >= "1" && event.key <= "4") setPace(Number(event.key) - 1);
     if (event.key.toLowerCase() === "o") {
       race.overtake = !race.overtake;
@@ -492,26 +650,144 @@ function wireControls() {
   });
 }
 
+function renderCarSelect() {
+  ui.carGrid.replaceChildren(
+    ...carChoices.map((car, index) => {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "car-card";
+      card.dataset.carId = car.id;
+      card.setAttribute("aria-pressed", String(car.id === selectedCar.id));
+      card.style.setProperty("--car-color", toCssColor(car.color));
+      card.style.setProperty("--accent-color", toCssColor(car.accent));
+      card.addEventListener("click", () => selectCar(car.id));
+
+      const swatch = document.createElement("span");
+      swatch.className = "car-swatch";
+
+      const label = document.createElement("span");
+      label.className = "car-label";
+
+      const number = document.createElement("span");
+      number.className = "car-number";
+      number.textContent = `0${index + 1}`;
+
+      const name = document.createElement("strong");
+      name.textContent = car.name;
+
+      const role = document.createElement("small");
+      role.textContent = car.role;
+
+      const stats = document.createElement("span");
+      stats.className = "spec-list";
+      [
+        ["SPD", car.ratings.speed],
+        ["COOL", car.ratings.cooldown],
+        ["TURN", car.ratings.cornering],
+        ["BST", car.ratings.boost],
+        ["CTRL", car.ratings.control],
+      ].forEach(([stat, rating]) => {
+        const row = document.createElement("span");
+        row.className = "spec-row";
+
+        const statLabel = document.createElement("span");
+        statLabel.textContent = stat;
+
+        const bar = document.createElement("span");
+        bar.className = "spec-bar";
+        bar.style.setProperty("--rating", rating);
+        const fill = document.createElement("i");
+        bar.append(fill);
+
+        const value = document.createElement("b");
+        value.textContent = rating;
+
+        row.append(statLabel, bar, value);
+        stats.append(row);
+      });
+
+      label.append(number, name, role);
+      card.append(swatch, label, stats);
+      return card;
+    }),
+  );
+}
+
+function selectCar(id, { announce = true } = {}) {
+  selectedCar = getCarChoice(id);
+  applyCarChoice(player, selectedCar);
+  updateSelectedCarUi();
+  if (announce) setRadio(`${selectedCar.name} selected.`);
+}
+
+function applyCarChoice(racer, car) {
+  racer.car = car;
+  racer.spec = car.spec;
+  racer.color = car.color;
+  racer.accent = car.accent;
+  racer.bodyMaterial.color.setHex(car.color);
+  racer.bodyMaterial.emissive.setHex(car.color);
+  racer.accentMaterial.color.setHex(car.accent);
+  racer.accentMaterial.emissive.setHex(car.accent);
+  racer.flameMaterial.color.setHex(car.accent);
+}
+
+function updateSelectedCarUi() {
+  ui.selectedCarName.textContent = selectedCar.name;
+  ui.selectedCarRole.textContent = selectedCar.role;
+  ui.selectedCarSwatch.style.setProperty("--car-color", toCssColor(selectedCar.color));
+  ui.selectedCarSwatch.style.setProperty("--accent-color", toCssColor(selectedCar.accent));
+
+  ui.carGrid.querySelectorAll(".car-card").forEach((card) => {
+    const active = card.dataset.carId === selectedCar.id;
+    card.classList.toggle("is-selected", active);
+    card.setAttribute("aria-pressed", String(active));
+  });
+}
+
+function startRace() {
+  gamePhase = "race";
+  resetRace(`${selectedCar.name} staged. Pace target confirmed.`);
+  syncScreenState();
+}
+
+function openGarage() {
+  gamePhase = "select";
+  resetRace(`${selectedCar.name} ready in garage.`);
+  syncScreenState();
+}
+
+function syncScreenState() {
+  const selecting = gamePhase === "select";
+  ui.carSelectScreen.classList.toggle("is-hidden", !selecting);
+  ui.hudLeft.classList.toggle("is-hidden", selecting);
+  ui.hudRight.classList.toggle("is-hidden", selecting);
+  ui.raceMessage.classList.toggle("is-hidden", selecting);
+}
+
 function setPace(index) {
+  if (gamePhase !== "race") return;
   race.pace = THREE.MathUtils.clamp(index, 0, paceProfiles.length - 1);
   setRadio(paceProfiles[race.pace].label);
   updateButtonState();
 }
 
 function deployBoost() {
-  if (race.finished || race.boostCooldown > 0 || race.boostTime > 0 || player.energy < 32 || player.heat > 92) {
-    setRadio(player.energy < 32 ? "Boost denied. Energy reserve too low." : "Boost locked out. Cool the craft.");
+  if (gamePhase !== "race") return;
+  const boostEnergyCost = 30 * player.spec.boostCost;
+  if (race.finished || race.boostCooldown > 0 || race.boostTime > 0 || player.energy < boostEnergyCost || player.heat > 92) {
+    setRadio(player.energy < boostEnergyCost ? "Boost denied. Energy reserve too low." : "Boost locked out. Cool the craft.");
     return;
   }
-  race.boostTime = 2.45;
-  race.boostCooldown = 7.5;
-  player.energy -= 30;
-  player.heat += 13;
+  race.boostTime = 2.45 * player.spec.boostDuration;
+  race.boostCooldown = 7.5 * player.spec.cooldown;
+  player.energy = clampStat(player.energy - boostEnergyCost);
+  player.heat = clampStat(player.heat + 13 * player.spec.heatGain);
   setRadio("Boost deployed. Driver committed.");
   updateButtonState();
 }
 
-function resetRace() {
+function resetRace(message = "Driver settled. Pace target confirmed.") {
   race.pace = 1;
   race.overtake = false;
   race.boostTime = 0;
@@ -535,7 +811,7 @@ function resetRace() {
     racer.finishTime = null;
     racer.targetLane = racer.lane;
   });
-  setRadio("Driver settled. Pace target confirmed.");
+  setRadio(message);
   updateButtonState();
 }
 
@@ -547,6 +823,12 @@ function loop() {
 }
 
 function update(dt) {
+  sceneTime += dt;
+  if (gamePhase === "select") {
+    updateGaragePreview(dt);
+    return;
+  }
+
   if (!race.finished) race.elapsed += dt;
   race.boostTime = Math.max(0, race.boostTime - dt);
   race.boostCooldown = Math.max(0, race.boostCooldown - dt);
@@ -555,6 +837,11 @@ function update(dt) {
   updateRacers(dt);
   updateCamera(dt);
   updateHud();
+}
+
+function updateGaragePreview(dt) {
+  racers.forEach((racer) => updateRacerTransform(racer, dt));
+  updateCamera(dt);
 }
 
 function updateRacers(dt) {
@@ -572,27 +859,42 @@ function updateRacers(dt) {
     const sampleIndex = Math.round(lapProgress * TRACK_SAMPLES) % TRACK_SAMPLES;
     const curvePenalty = trackData.curvature[sampleIndex];
     const downhill = THREE.MathUtils.clamp(-trackData.tangents[sampleIndex].y * 0.9, -0.16, 0.22);
-    const turnLimit = 1 - curvePenalty * 0.27;
-    const baseTarget = (112 + downhill * 28) * turnLimit * racer.skill;
+    const spec = racer.spec ?? BASE_CAR_SPEC;
+    const cornerHeat = Math.max(0.72, 1 / spec.cornering);
+    const turnLimit = 1 - (curvePenalty * 0.27) / spec.cornering;
+    const baseTarget = (112 + downhill * 28) * turnLimit * racer.skill * spec.speed;
     let targetSpeed = baseTarget;
 
     if (racer.isPlayer) {
       const pace = paceProfiles[race.pace];
       const inTraffic = rivalAhead && rivalAhead.progress - racer.progress < 35 && rivalAhead.progress > racer.progress;
       targetSpeed *= pace.speed;
-      racer.energy = clampStat(racer.energy + pace.energy * dt + (curvePenalty > 0.72 ? 2.2 * dt : 0));
-      racer.heat = clampStat(racer.heat + pace.heat * dt + curvePenalty * 2.4 * dt);
-      racer.focus = clampStat(racer.focus + pace.focus * dt - Math.max(0, racer.heat - 78) * 0.08 * dt);
+      racer.energy = clampStat(
+        racer.energy +
+          scaleStatRate(pace.energy, spec.energyRecovery, spec.energyCost) * dt +
+          (curvePenalty > 0.72 ? 2.2 * spec.energyRecovery * dt : 0),
+      );
+      racer.heat = clampStat(
+        racer.heat +
+          scaleStatRate(pace.heat, spec.heatGain, spec.cooling) * dt +
+          curvePenalty * 2.4 * spec.heatGain * cornerHeat * dt,
+      );
+      racer.focus = clampStat(
+        racer.focus +
+          scaleStatRate(pace.focus, spec.focusRecovery, spec.focusCost) * dt -
+          Math.max(0, racer.heat - 78) * 0.08 * spec.focusCost * dt,
+      );
 
       if (race.overtake && inTraffic) {
-        targetSpeed += 18;
-        racer.energy = clampStat(racer.energy - 7 * dt);
-        racer.focus = clampStat(racer.focus - 12 * dt);
-        racer.heat = clampStat(racer.heat + 4.6 * dt);
+        targetSpeed += 18 * spec.overtakePower;
+        racer.energy = clampStat(racer.energy - 7 * spec.energyCost * dt);
+        racer.focus = clampStat(racer.focus - 12 * spec.focusCost * dt);
+        racer.heat = clampStat(racer.heat + 4.6 * spec.heatGain * dt);
         racer.targetLane = rivalAhead.lane > 0 ? -0.32 : 0.32;
         if (race.elapsed - racer.lastOvertakeTry > 3.2) {
           racer.lastOvertakeTry = race.elapsed;
-          const risk = Math.max(0, racer.heat - 76) * 0.012 + Math.max(0, 38 - racer.focus) * 0.018;
+          const risk =
+            (Math.max(0, racer.heat - 76) * 0.012 + Math.max(0, 38 - racer.focus) * 0.018) / spec.cornering;
           if (Math.random() < risk) {
             racer.wobble = 1.25;
             racer.speed *= 0.84;
@@ -606,24 +908,24 @@ function updateRacers(dt) {
       }
 
       if (race.boostTime > 0) {
-        targetSpeed += 45;
-        racer.heat = clampStat(racer.heat + 8 * dt);
+        targetSpeed += 45 * spec.boostPower;
+        racer.heat = clampStat(racer.heat + 8 * spec.heatGain * dt);
       }
     } else {
       racer.aiMood += dt;
       const leaderGap = order[0].progress - racer.progress;
       targetSpeed *= 0.97 + Math.sin(racer.aiMood * 0.35) * 0.035;
       if (leaderGap > 40 && racer.energy > 20 && Math.sin(racer.aiMood) > 0.965) {
-        racer.boost = 1.7;
-        racer.energy -= 18;
+        racer.boost = 1.7 * spec.boostDuration;
+        racer.energy -= 18 * spec.boostCost;
       }
       if (racer.boost > 0) {
         racer.boost -= dt;
-        targetSpeed += 30;
+        targetSpeed += 30 * spec.boostPower;
       }
-      racer.energy = clampStat(racer.energy + 1.5 * dt);
-      racer.heat = clampStat(racer.heat - 1.6 * dt + curvePenalty * 2.5 * dt);
-      racer.focus = clampStat(racer.focus + 1.3 * dt);
+      racer.energy = clampStat(racer.energy + 1.5 * spec.energyRecovery * dt);
+      racer.heat = clampStat(racer.heat - 1.6 * spec.cooling * dt + curvePenalty * 2.5 * spec.heatGain * cornerHeat * dt);
+      racer.focus = clampStat(racer.focus + 1.3 * spec.focusRecovery * dt);
       racer.targetLane = racer.lane + Math.sin(racer.aiMood * 0.4) * 0.08;
     }
 
@@ -636,7 +938,7 @@ function updateRacers(dt) {
     const tired = racer.focus < 25 ? (25 - racer.focus) * 0.8 : 0;
     targetSpeed -= overheated + tired;
     targetSpeed = Math.max(54, targetSpeed);
-    racer.speed += (targetSpeed - racer.speed) * (1 - Math.pow(0.022, dt));
+    racer.speed += (targetSpeed - racer.speed) * (1 - Math.pow(0.022, dt * spec.acceleration));
     racer.progress += racer.speed * dt;
 
     if (racer.progress >= trackLength * TOTAL_LAPS) {
@@ -657,8 +959,8 @@ function updateRacers(dt) {
   const playerLap = Math.min(TOTAL_LAPS, Math.floor(player.progress / trackLength) + 1);
   if (playerLap > race.lastLap) {
     race.lastLap = playerLap;
-    player.energy = clampStat(player.energy + 18);
-    player.focus = clampStat(player.focus + 9);
+    player.energy = clampStat(player.energy + 18 * player.spec.lapCharge);
+    player.focus = clampStat(player.focus + 9 * player.spec.focusRecovery);
     setRadio(`Lap ${playerLap}. Energy reserve topped up.`);
   }
 }
@@ -672,8 +974,8 @@ function updateRacerTransform(racer, dt) {
   racer.laneVelocity *= Math.pow(0.12, dt);
   racer.lane += racer.laneVelocity * dt;
 
-  const hover = 2.3 + Math.sin(race.elapsed * 5.4 + racer.progress * 0.02) * 0.32;
-  const wobble = racer.wobble > 0 ? Math.sin(race.elapsed * 28) * racer.wobble * 0.55 : 0;
+  const hover = 2.3 + Math.sin(sceneTime * 5.4 + racer.progress * 0.02) * 0.32;
+  const wobble = racer.wobble > 0 ? Math.sin(sceneTime * 28) * racer.wobble * 0.55 : 0;
   const position = point.clone().addScaledVector(lateral, racer.lane * trackWidth);
   position.y += hover;
   racer.group.position.lerp(position, 1 - Math.pow(0.001, dt));
@@ -728,7 +1030,7 @@ function updateHud() {
   ui.gapValue.textContent = gap;
   ui.raceState.textContent = race.finished ? "DONE" : race.boostTime > 0 ? "BOOST" : "LIVE";
 
-  ui.boostButton.disabled = race.finished || race.boostCooldown > 0 || player.energy < 32 || player.heat > 92;
+  ui.boostButton.disabled = race.finished || race.boostCooldown > 0 || player.energy < 30 * player.spec.boostCost || player.heat > 92;
   ui.boostState.textContent = race.boostTime > 0 ? "BURN" : race.boostCooldown > 0 ? `${Math.ceil(race.boostCooldown)}` : "READY";
   updateButtonState();
   renderStandings(order);
@@ -790,6 +1092,18 @@ function resize() {
   renderer.setSize(width, height, false);
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
+}
+
+function getCarChoice(id) {
+  return carChoices.find((car) => car.id === id) ?? carChoices[0];
+}
+
+function scaleStatRate(rate, positiveMultiplier, negativeMultiplier) {
+  return rate >= 0 ? rate * positiveMultiplier : rate * negativeMultiplier;
+}
+
+function toCssColor(hex) {
+  return `#${hex.toString(16).padStart(6, "0")}`;
 }
 
 function positiveModulo(value, modulo) {
